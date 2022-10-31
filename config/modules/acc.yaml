@@ -1,0 +1,11 @@
+acc:
+  BBIN:
+    ip: 34.160.103.13
+    hostname: rd3-dev-http-proxy
+    port: 80
+    protocol: http
+  BBGP:
+    ip: 34.160.103.13
+    hostname: rd3-dev-http-proxy
+    port: 80
+    protocol: http

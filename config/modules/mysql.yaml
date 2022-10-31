@@ -1,0 +1,75 @@
+mysql:
+  idleConns: 10
+  openConns: 100
+  AccountDB:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+  ProductDB:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+  CoreDB:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+  GameDB3:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+  WagersDB3:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+  CentralDB3:
+    debug: false
+    master:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234
+    slave:
+      host: wenflow_mysql
+      port: 3306
+      user: root
+      password: Qwer1234

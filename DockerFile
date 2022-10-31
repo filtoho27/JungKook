@@ -1,0 +1,11 @@
+FROM golang:1.18.7-alpine3.16
+
+ENV TZ=Asia/Taipei
+ENV MODE=dev
+ENV SERVICE=dev
+ENV CLOUD_ENV=true
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN mkdir /home/gbt/
+RUN apk --no-cache add curl
+RUN curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -d v1.42.0

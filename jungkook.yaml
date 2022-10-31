@@ -1,0 +1,56 @@
+version: '3.13'
+services:
+  jungkook:
+    build:
+      context: .
+      dockerfile: DockerFile
+    image: wenflow_api_image
+    container_name: jungkook
+    ports:
+      - "2365:80"
+    volumes:
+      - ./:/home/gbt/
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cd /home/gbt;alias air='~/.air';air -c .air.toml
+    networks:
+      - wenflow
+  wenflow_mysql:
+    image: mysql:5.7
+    container_name: wenflow_mysql
+    ports:
+      - "3307:3306"
+    volumes:
+      - /Users/jennifer_lu/wenflow/mysql_backup:/var/lib/mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: Qwer1234
+      MYSQL_DATABASE: Account
+      MYSQL_USER: jennifer
+      MYSQL_PASSWORD: qwe123
+    networks:
+      - wenflow
+  wenflow_phpmyadmin:
+    image: phpmyadmin
+    container_name: wenflow_phpmyadmin
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: wenflow_mysql
+      PMA_PORT: 3306
+    networks:
+      - wenflow
+  redis:
+    image: redis:3.0.0
+    container_name: wenflow_redis
+    ports:
+      - 6380:6379
+    volumes:
+      - /Users/jennifer_lu/wenflow/redis.conf:/usr/local/etc/redis/redis.conf
+    command: [ "sh", "-c", "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    networks:
+      - wenflow
+networks:
+  wenflow:
+
