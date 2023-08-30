@@ -1,8 +1,6 @@
 package commontype
 
 type RedisInterface interface {
-	GetExRedisData() (result ExRedis, err error)
-	SetExRedisData(name string, dtime string) (err error)
 	SetEmailCode(userName string, code int) (err error)
 	GetEmailCode(userName string) (result EmailCode, err error)
 	DelEmailCode(userName string) (err error)

@@ -17,10 +17,6 @@ import (
 type P struct {
 	AccountDB  MasterSlaveDB
 	ProductDB  MasterSlaveDB
-	CoreDB     MasterSlaveDB
-	GameDB3    MasterSlaveDB
-	WagersDB3  MasterSlaveDB
-	CentralDB3 MasterSlaveDB
 }
 
 type MasterSlaveDB struct {

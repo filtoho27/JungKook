@@ -9,7 +9,6 @@ import (
 )
 
 func SetMap(r *mux.Router) {
-	exampleGroup(r)
 	accountGroup(r)
 	shoppingGroup(r)
 }

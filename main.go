@@ -7,9 +7,7 @@ import (
 	"os"
 	"sync"
 
-	// "jungkook/modules/acc"
 	"jungkook/modules/mysql"
-	// "jungkook/modules/portal"
 	"jungkook/modules/redis"
 	"jungkook/router"
 
@@ -35,10 +33,6 @@ func serviceInit() {
 	mysql.Init()
 	// RB初始化
 	redis.Init()
-	// // ACC初始化
-	// acc.Init()
-	// // Portal初始化
-	// portal.Init()
 }
 
 func handleHealthz(w http.ResponseWriter, r *http.Request) {
