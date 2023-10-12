@@ -7,13 +7,14 @@ import (
 )
 
 type responseType struct {
-	Result bool        `json:"result"`
-	Data   interface{} `json:"data"`
+	ErrCode int         `json:"errCode"`
+	ErrMsg  string      `json:"errMsg"`
+	Data    interface{} `json:"data"`
 }
 
 type responseError struct {
-	Result bool              `json:"result"`
-	Data   Error.CustomError `json:"data"`
+	ErrCode int    `json:"errCode"`
+	ErrMsg  string `json:"errMsg"`
 }
 
 func FormatResult(w http.ResponseWriter, data interface{}, err error) {
@@ -27,8 +28,9 @@ func FormatResult(w http.ResponseWriter, data interface{}, err error) {
 
 func handleResult(w http.ResponseWriter, data interface{}) {
 	result := responseType{
-		Result: true,
-		Data:   data,
+		ErrCode: 0,
+		ErrMsg:  "",
+		Data:    data,
 	}
 	jsondata, _ := json.Marshal(result)
 	_, _ = w.Write(jsondata)
@@ -37,8 +39,8 @@ func handleResult(w http.ResponseWriter, data interface{}) {
 func handleError(w http.ResponseWriter, err error) {
 	customErr, _ := err.(Error.CustomError)
 	result := responseError{
-		Result: false,
-		Data:   customErr,
+		ErrCode: customErr.ErrCode,
+		ErrMsg:  customErr.ErrMsg,
 	}
 	jsondata, _ := json.Marshal(result)
 	_, _ = w.Write(jsondata)

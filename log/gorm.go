@@ -12,7 +12,7 @@ type GormLog struct {
 }
 
 func (g *GormLog) Printf(text string, Vars ...interface{}) {
-	file := "db-error"
+	file := "DBError"
 	dirPath := "./txt/modules"
 	_ = checkDir(dirPath)
 	logPath := getPath(dirPath, file)

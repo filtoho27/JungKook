@@ -6,99 +6,33 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"runtime"
 	"time"
 )
 
-func WriteLog(folderName string, logName string, logData interface{}) {
-	dirPath := fmt.Sprintf("./txt/%s", folderName)
-	_ = checkDir(dirPath)
-	logPath := getPath(dirPath, logName)
-	logContent := getLogContent(logName, logData)
-	fileOpen, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
-	defer fileOpen.Close()
-	logger := log.New(fileOpen, "", 0)
-	logger.Println(logContent)
-}
-
-func WriteAccLog(funcName string, customErr error, err error, accReturn string, param []interface{}) {
-	file := "acc-error"
-	dirPath := "./txt/modules"
+func WriteLog(folder string, file string, err error, customErr error, paramMsg string, params ...interface{}) {
+	dirPath := fmt.Sprintf("./txt/%s", folder)
 	_ = checkDir(dirPath)
 	logPath := getPath(dirPath, file)
+	fileOpen, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	defer fileOpen.Close()
 	nowTime, usEastTime := getTime()
-	customError := customErr.(Error.CustomError)
-	paramText := ""
-	for idx, val := range param {
-		if idx > 0 {
-			paramText += ", "
-		}
-		paramText = fmt.Sprintf("%s%v", paramText, val)
-	}
-	accLog := fmt.Sprintf(
-		"type=%s|datetime=%s|datetime_gmt=%s|funcName=%s|param=(%+v)|accReturn=%s",
-		file, nowTime, usEastTime, funcName, paramText, accReturn,
+	logMsg := fmt.Sprintf(
+		"type=%s|datetime=%s|datetime_gmt=%s|",
+		file, nowTime, usEastTime,
 	)
 	if customErr != nil {
-		accLog += fmt.Sprintf("|error_code=%d|error_msg=%s", customError.ErrCode, customError.ErrMsg)
+		customError := customErr.(Error.CustomError)
+		logMsg += fmt.Sprintf("ErrorCode=%d|ErrorMsg=%s|", customError.ErrCode, customError.ErrMsg)
 	}
 	if err != nil {
-		accLog += fmt.Sprintf("|origin_error=%+v", err)
+		logMsg += fmt.Sprintf("OriginError=%+v|", err)
 	}
-	fileOpen, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
-	defer fileOpen.Close()
+	if paramMsg != "" {
+		logMsg += fmt.Sprintf("%s|", paramMsg)
+	}
 	logger := log.New(fileOpen, "", 0)
-	logger.Println(accLog)
-}
-
-func WriteRedisLog(rbName string, errMsg string, err error) {
-	file := "redis-error"
-	dirPath := "./txt/modules"
-	_ = checkDir(dirPath)
-	logPath := getPath(dirPath, file)
-	nowTime, usEastTime := getTime()
-	redisLog := fmt.Sprintf(
-		"type=%s|datetime=%s|datetime_gmt=%s|rbName=%s|err_message=%s",
-		file, nowTime, usEastTime, rbName, errMsg,
-	)
-	if err != nil {
-		redisLog += fmt.Sprintf("|origin_error=%+v", err)
-	}
-	fileOpen, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
-	defer fileOpen.Close()
-	logger := log.New(fileOpen, "", 0)
-	logger.Println(redisLog)
-}
-
-func WriteApiLog(funcName string, customErr error, err error, apiReturn string, param []interface{}) {
-	file := "api-error"
-	dirPath := "./txt/modules"
-	_ = checkDir(dirPath)
-	logPath := getPath(dirPath, file)
-	nowTime, usEastTime := getTime()
-	customError := customErr.(Error.CustomError)
-	paramText := ""
-	for idx, val := range param {
-		if idx > 0 {
-			paramText += ", "
-		}
-		paramText = fmt.Sprintf("%s%v", paramText, val)
-	}
-	apiLog := fmt.Sprintf(
-		"type=%s|datetime=%s|datetime_gmt=%s|funcName=%s|param=(%+v)|apiReturn=%s",
-		file, nowTime, usEastTime, funcName, paramText, apiReturn,
-	)
-	if customErr != nil {
-		apiLog += fmt.Sprintf("|error_code=%d|error_msg=%s", customError.ErrCode, customError.ErrMsg)
-	}
-	if err != nil {
-		apiLog += fmt.Sprintf("|origin_error=%+v", err)
-	}
-	fileOpen, _ := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
-	defer fileOpen.Close()
-	logger := log.New(fileOpen, "", 0)
-	logger.Println(apiLog)
+	logger.Printf(logMsg, params...)
 }
 
 func WritePanicLog(r *http.Request, errMsg string) {
@@ -138,19 +72,6 @@ func WritePanicLog(r *http.Request, errMsg string) {
 	if os.Getenv("MODE") == "dev" {
 		log.Printf("%s", msg)
 	}
-}
-
-func getLogContent(logName string, info interface{}) (logContent string) {
-	nowTime, usEastTime := getTime()
-	logContent = fmt.Sprintf("type=%s|datetime=%s|datetime_gmt=%s|", logName, nowTime, usEastTime)
-	infoType := reflect.TypeOf(info)
-	infoValue := reflect.ValueOf(info)
-	for i := 0; i < infoType.NumField(); i++ {
-		field := infoType.Field(i)
-		value := infoValue.Field(i).Interface()
-		logContent += fmt.Sprintf("%s=%v|", field.Name, value)
-	}
-	return
 }
 
 func getTime() (now string, usEast string) {

@@ -1,18 +1,23 @@
 package foundation
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
+	"fmt"
+	Error "jungkook/error"
+	customLog "jungkook/log"
+	"strings"
+
+	"github.com/spf13/viper"
 )
 
-func GetConfig(path string) (result []byte, err error) {
-	configPath := os.Getenv("CONFIGPATH")
-	jsonFile, err := os.Open(configPath + path)
+func GetViperConfig(path string, name string, ext string) (config *viper.Viper) {
+	config = viper.New()
+	config.SetConfigName(name)
+	config.SetConfigType(ext)
+	config.AddConfigPath(path)
+	err := config.ReadInConfig()
 	if err != nil {
-		log.Printf("%+v", err)
+		msg := fmt.Sprintf("GET_%s_CONFIG_FAILED", strings.ToUpper(name))
+		customLog.WriteLog("sys", "ConfigError", err, Error.CustomError{ErrMsg: msg}, "")
 	}
-	defer jsonFile.Close()
-	result, _ = ioutil.ReadAll(jsonFile)
 	return
 }

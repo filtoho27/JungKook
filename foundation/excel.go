@@ -52,10 +52,5 @@ func MakeExcel(w http.ResponseWriter, data Type.ExcelType) {
 }
 
 func handleLogRecord(fileName string, sheetName string, msg string) {
-	logData := excelLog{
-		FileName:  fileName,
-		SheetName: sheetName,
-		ErrMsg:    msg,
-	}
-	customLog.WriteLog("tool", "excel-error", logData)
+	customLog.WriteLog("tool", "ExcelError", nil, nil, "FileName=%s|SheetName=%s|ErrMsg=%s", fileName, sheetName, msg)
 }

@@ -1,27 +1,16 @@
-mysql:
-  idleConns: 10
-  openConns: 100
-  AccountDB:
-    debug: false
-    master:
-      host: wenflow_mysql
-      port: 3306
-      user: root
-      password: Qwer1234
-    slave:
-      host: wenflow_mysql
-      port: 3306
-      user: root
-      password: Qwer1234
-  ProductDB:
-    debug: false
-    master:
-      host: wenflow_mysql
-      port: 3306
-      user: root
-      password: Qwer1234
-    slave:
-      host: wenflow_mysql
-      port: 3306
-      user: root
-      password: Qwer1234
+idleConns: 10
+openConns: 100
+AccountDB:
+  db: AccountDB
+  host_m: wenflow_mysql
+  host_s: wenflow_mysql
+  port: 3306
+  user: root
+  password: Qwer1234
+ProductDB:
+  db: ProductDB
+  host_m: wenflow_mysql
+  host_s: wenflow_mysql
+  port: 3306
+  user: root
+  password: Qwer1234

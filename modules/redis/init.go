@@ -7,6 +7,7 @@ import (
 	"time"
 
 	Type "jungkook/commonType"
+	"jungkook/foundation"
 	customLog "jungkook/log"
 
 	"github.com/gomodule/redigo/redis"
@@ -31,7 +32,7 @@ var redisLib Type.RedisInterface
 
 // 初始化連線
 func Init() {
-	getConfig()
+	config = foundation.GetViperConfig("./config/modules/", "redis", "yaml")
 	wg := new(sync.WaitGroup)
 
 	redisPool = &P{}
@@ -60,65 +61,61 @@ func GetRedis() Type.RedisInterface {
 	return redisLib
 }
 
-// 取得設定檔
-func getConfig() {
-	config = viper.New()
-	config.SetConfigName("redis")
-	config.SetConfigType("yaml")
-	config.AddConfigPath("./config/modules/")
-	err := config.ReadInConfig()
-	if err != nil {
-		customLog.WriteRedisLog("", "GET_REDIS_CONFIG_FAILED", err)
-	}
-}
-
 // 建立連線
 func newMasterSlaveRB(rbName string) (masterSlaveRB MasterSlaveRB) {
-	masterSlaveRB.Master = newPool(rbName, "master")
-	masterSlaveRB.Slave = newPool(rbName, "slave")
+	masterSlaveRB.Master = newPool(rbName, "m")
+	masterSlaveRB.Slave = newPool(rbName, "s")
 	return
 }
 
 func newPool(rbName string, rbType string) (rb *redis.Pool) {
-	rbKey := fmt.Sprintf("redis.%s.%s", rbName, rbType)
-	rbConfig := config.GetStringMapString(rbKey)
-	host := rbConfig["host"]
-	port := rbConfig["port"]
-	// auth := rbConfig["password"]
-	index := rbConfig["index"]
+	rbConfig := config.GetStringMapString(rbName)
+	server := fmt.Sprintf("%s:%s", rbConfig["host_"+rbType], rbConfig["port"])
 
 	rb = &redis.Pool{
 		Wait:        true,
-		MaxIdle:     config.GetInt("redis.maxIdle"),   // 設置空閒連線的最大數量
-		MaxActive:   config.GetInt("redis.maxActive"), // 設置打開連線的最大數量
-		IdleTimeout: 3 * time.Second,                  // 設置空閒連接超時時間
+		MaxIdle:     config.GetInt("maxIdle"),   // 設置空閒連線的最大數量
+		MaxActive:   config.GetInt("maxActive"), // 設置打開連線的最大數量
+		IdleTimeout: 3 * time.Second,            // 設置空閒連接超時時間
 		Dial: func() (redis.Conn, error) {
-			server := host + ":" + port
-			rb, err := redis.Dial("tcp",
-				server,
-				redis.DialConnectTimeout(time.Duration(1)*time.Minute),
-				redis.DialReadTimeout(time.Duration(3)*time.Second),
-				redis.DialWriteTimeout(time.Duration(3)*time.Second),
-			)
+			var conn redis.Conn
+			var err error
+			retryTime := 0
+			for retryTime < 2 {
+				if retryTime == 1 {
+					time.Sleep(500 * time.Microsecond)
+				}
+				retryTime++
 
-			if err != nil {
-				customLog.WriteRedisLog(rbName, "REDIS_CONNECTION_ERROR", err)
-				return rb, err
+				conn, err = redis.Dial("tcp",
+					server,
+					redis.DialConnectTimeout(30*time.Second),
+					redis.DialReadTimeout(3*time.Second),
+					redis.DialWriteTimeout(3*time.Second),
+				)
+
+				if err != nil {
+					connLog := getRedisConnLog(rb, rbName, retryTime, "REDIS_CONNECTION_ERROR")
+					customLog.WriteLog("modules", "RedisError", err, nil, connLog)
+					continue
+				}
+
+				_, err = conn.Do("AUTH", rbConfig["password"])
+				if err != nil {
+					connLog := getRedisConnLog(rb, rbName, retryTime, "REDIS_AUTH_ERROR")
+					customLog.WriteLog("modules", "RedisError", err, nil, connLog)
+					continue
+				}
+
+				_, err = conn.Do("SELECT", rbConfig["index"])
+				if err != nil {
+					connLog := getRedisConnLog(rb, rbName, retryTime, "REDIS_SELECT_INDEX_ERROR")
+					customLog.WriteLog("modules", "RedisError", err, nil, connLog)
+					continue
+				}
+				break
 			}
-
-			// _, err = rb.Do("AUTH", auth)
-			// if err != nil {
-			// 	customLog.WriteRedisLog(rbName, "REDIS_AUTH_ERROR", err)
-			// 	return rb, err
-			// }
-
-			_, err = rb.Do("SELECT", index)
-			if err != nil {
-				customLog.WriteRedisLog(rbName, "REDIS_SELECT_INDEX_ERROR", err)
-				return rb, err
-			}
-
-			return rb, err
+			return conn, err
 		},
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
 			if time.Since(t) < time.Minute {
@@ -129,4 +126,13 @@ func newPool(rbName string, rbType string) (rb *redis.Pool) {
 		},
 	}
 	return
+}
+
+func getRedisConnLog(p *redis.Pool, name string, time int, err string) string {
+	status := p.Stats()
+	msg := fmt.Sprintf(
+		"RBName=%s|ErrorMsg=%s|ReConnTime:%d|Active=%d|Idle=%d|Wait=%d|WaitDuration=%d",
+		name, err, time, status.ActiveCount, status.IdleCount, status.WaitCount, status.WaitDuration,
+	)
+	return msg
 }

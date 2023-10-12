@@ -10,6 +10,6 @@ type ShoppingSt struct{}
 
 func (ex *ShoppingSt) ShoppingListHandler(w http.ResponseWriter, r *http.Request) {
 	module := api.GetModule()
-	err := getShoppingList(module)
-	kernel.FormatResult(w, nil, err)
+	shoppingList, err := getShoppingList(module)
+	kernel.FormatResult(w, shoppingList, err)
 }

@@ -32,8 +32,9 @@ func login(module *Type.ModuleType, userName string, passWord string, loginType 
 	}
 
 	// 檢查密碼是否正確
-	if memberShip.PassWord != passWord{
+	if memberShip.PassWord != passWord {
 		err = Error.CustomError{ErrMsg: "PASSWORD_IS_INCORRECT", ErrCode: 1010015}
+		return
 	}
 
 	// 產生Token

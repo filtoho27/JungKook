@@ -1,25 +1,14 @@
-redis:
-  maxIdle: 10
-  maxActive: 100
-  Central:
-    master:
-      host: wenflow_redis
-      port: 6379
-      password: q96ej3z04
-      index: 1
-    slave:
-      host: wenflow_redis
-      port: 6379
-      password: q96ej3z04
-      index: 1
-  Member:
-    master:
-      host: wenflow_redis
-      port: 6379
-      password: q96ej3z04
-      index: 2
-    slave:
-      host: wenflow_redis
-      port: 6379
-      password: q96ej3z04
-      index: 2
+maxIdle: 10
+maxActive: 100
+Central:
+  host_m: wenflow_redis
+  host_s: wenflow_redis
+  port: 6379
+  password: q96ej3z04
+  index: 1
+Member:
+  host_m: wenflow_redis
+  host_s: wenflow_redis
+  port: 6379
+  password: q96ej3z04
+  index: 2
