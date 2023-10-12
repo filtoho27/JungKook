@@ -100,12 +100,12 @@ func newPool(rbName string, rbType string) (rb *redis.Pool) {
 					continue
 				}
 
-				_, err = conn.Do("AUTH", rbConfig["password"])
-				if err != nil {
-					connLog := getRedisConnLog(rb, rbName, retryTime, "REDIS_AUTH_ERROR")
-					customLog.WriteLog("modules", "RedisError", err, nil, connLog)
-					continue
-				}
+				// _, err = conn.Do("AUTH", rbConfig["password"])
+				// if err != nil {
+				// 	connLog := getRedisConnLog(rb, rbName, retryTime, "REDIS_AUTH_ERROR")
+				// 	customLog.WriteLog("modules", "RedisError", err, nil, connLog)
+				// 	continue
+				// }
 
 				_, err = conn.Do("SELECT", rbConfig["index"])
 				if err != nil {

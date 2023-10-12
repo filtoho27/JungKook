@@ -7,11 +7,6 @@ type RedisInterface interface {
 	SetUserToken(userID int, userToken string) (err error)
 }
 
-type ExRedis struct {
-	Name     string `json:"name"`
-	DateTime string `json:"datetime"`
-}
-
 type EmailCode struct {
 	Code      int   `json:"code"`
 	Timestamp int64 `json:"timestamp"`
